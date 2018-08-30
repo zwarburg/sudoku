@@ -129,6 +129,7 @@ TEXT
     #   puzzle.solve!
     #   puts "#########################"
     #   puts puzzle
+    # 
     # end
   end
 

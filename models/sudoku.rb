@@ -1,10 +1,11 @@
 # Console: require '.\sudoku.rb'
 require_relative 'cell'
+require 'colorize'
 
 class Sudoku
   attr_accessor :board
-  # DEBUG = true
-  DEBUG = false
+  DEBUG = true
+  # DEBUG = false
   SIZE = 9
   NUMBERS = (1..9).to_a
 
@@ -19,10 +20,9 @@ class Sudoku
       @board = board.dup
       @board.map!.with_index do |row , y|
         row.map!.with_index do |value, x|
-          Cell.new(value, y, x)
+          Cell.new(value, x, y)
         end
       end
-      @board 
     else
       @board = []
       SIZE.times do |y|
@@ -32,8 +32,8 @@ class Sudoku
         end
         @board << row
       end
-      @board
     end
+    self.update_possibles!
   end
 
   def ==(other_object)
@@ -61,8 +61,8 @@ class Sudoku
       +---------+---------+---------+---------+---------+---------+---------+---------+---------+
     BOARD
     @board.flatten.each do |cell|
-      possibles = cell.solved? ? '-' : cell.possibles.join
-      result.sub!(/XXXXXXXXX/, possibles.center(9))
+      output = cell.solved? ? "#{cell.value}".center(9).red : cell.possibles.join.center(9)
+      result.sub!(/XXXXXXXXX/, output)
     end
     result
   end
@@ -94,20 +94,29 @@ class Sudoku
     until solved?
       @changed = false
       log('################')
+      log(self.to_p)
       @board.each_with_index do |row, x|
         row.each_with_index do |_col, y|
-          next unless self[x, y].nil?
+          cell = self[x, y]
+          next unless cell.value.nil?
           allowed_values = allowed_in_cell(x, y)
           raise "There are no possible values for #{x}, #{y}" if allowed_values.empty?
           if allowed_values.size == 1
             self[x, y] = allowed_values[0]
             @changed = true
+          else
+            allowed_values.each do |val|
+              if unique_in_row?(cell, val) || unique_in_col?(cell, val) || unique_in_square?(cell, val)
+                cell.value = val
+                @changed = true
+              end
+            end
           end
-          #TODO: if the cell can be multiple values, check and see if there are any values that are exclusive to that 
-          # cell in the row, column or suqare. I.E. is it the ONLY cell in the row than hold a 2.
+          
           log("The cell at #{x}, #{y} can be: #{allowed_values.inspect}")
         end
       end
+      update_possibles!
       raise 'Not solvable at this time' unless @changed
     end
   end
@@ -115,9 +124,48 @@ class Sudoku
   def solved?
     @board.flatten.none?{ |cell| cell.value.nil? }
   end
+  
+  def unique_in_row?(cell, value)
+    raise ArgumentError, 'invalid value for cell' unless cell.possibles.include?(value)
+    row = row(cell.row)
+    row.each do |test_cell|
+      next if cell == test_cell
+      return false if test_cell.possibles.include?(value)
+    end
+    true
+  end
+  
+  def unique_in_col?(cell, value)
+    raise ArgumentError, 'invalid value for cell' unless cell.possibles.include?(value)
+    col = col(cell.col)
+    col.each do |test_cell|
+      next if cell == test_cell
+      return false if test_cell.possibles.include?(value)
+    end
+    true
+  end
+  
+  def unique_in_square?(cell, value)
+    raise ArgumentError, 'invalid value for cell' unless cell.possibles.include?(value) 
+    square = square(cell.col, cell.row).flatten
+    square.each do |test_cell|
+      next if cell == test_cell
+      return false if test_cell.possibles.include?(value)
+    end
+    true
+  end
+  
+  def update_possibles!
+    @board.each do |row|
+      row.each do |cell|
+        cell.possibles = (cell.solved? ? [] : allowed_in_cell(cell.col, cell.row))
+      end
+    end
+    @board
+  end
 
   def [](x, y)
-    @board[y][x].value
+    @board[y][x]
   end
 
   def []=(x, y, value)
@@ -145,7 +193,7 @@ class Sudoku
   def allowed_in_cell(x, y)
     NUMBERS - values(row(y)) - values(col(x)) - values(square(x, y))
   end
-
+  
   def allowed_in_row(y)
     NUMBERS - values(row(y))
   end

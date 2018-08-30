@@ -25,7 +25,7 @@ class Cell
   end
 
   def to_s
-    "Cell x: #{col}, y: #{row}, box: #{box}, value: #{value} & posibles: #{possibles.inspect}"
+    "Cell x: #{col}, y: #{row}, box: #{box}, value: #{value.nil? ? '-' : value} & posibles: #{possibles.inspect}"
   end
 
   private

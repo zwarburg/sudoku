@@ -4,8 +4,10 @@ require_relative '../models/sudoku'
 BOARD = [[8, nil, 5, 3, 6, 9, nil, nil, nil], [nil, 4, nil, 5, nil, nil, 6, 1, 9], [nil, 9, 2, 7, nil, nil, nil, 8, 5], [2, 6, 9, nil, 3, nil, 1, 7, nil], [nil, nil, 1, 2, 4, 7, nil, nil, 3], [nil, 3, nil, nil, nil, 1, 5, 2, 8], [9, nil, 6, nil, 5, 8, nil, 3, nil], [4, nil, nil, nil, 2, 6, 8, 5, nil], [1, 5, nil, nil, nil, nil, 2, nil, 6]]
 BEGINNER = '../fixtures/beginner.txt'.freeze
 BEGINNER_SOLUTION = '../fixtures/beginner_solution.txt'.freeze
-FILENAME = '../fixtures/easy.txt'.freeze
-SOLUTION_FILE = '../fixtures/easy_solution.txt'.freeze
+EASY = '../fixtures/easy.txt'.freeze
+EASY_SOLUTION = '../fixtures/easy_solution.txt'.freeze
+MEDIUM = '../fixtures/medium.txt'.freeze
+MEDIUM_SOLUTION = '../fixtures/medium_solution.txt'.freeze
 
 describe 'Sudoku' do
   describe 'initialize' do
@@ -14,7 +16,7 @@ describe 'Sudoku' do
     end
 
     it 'creates a board from a file' do
-      expect(Sudoku.new(filename: FILENAME).all_values).to eq(BOARD)
+      expect(Sudoku.new(filename: EASY).all_values).to eq(BOARD)
     end
 
     it 'creates a board from an array' do
@@ -66,7 +68,7 @@ describe 'Sudoku' do
     it 'can set a value' do
       puzzle = generate_puzzle
       puzzle[8, 0] = 2
-      expect(puzzle[8, 0]).to eq(2)
+      expect(puzzle[8, 0].value).to eq(2)
     end
 
     it 'raises an error for duplicate in row' do
@@ -84,11 +86,11 @@ describe 'Sudoku' do
 
   describe 'getters' do
     it 'can get a specific value' do
-      expect(generate_puzzle[1, 2]).to eq(9)
+      expect(generate_puzzle[1, 2].value).to eq(9)
     end
 
     it 'can get a nil value' do
-      expect(generate_puzzle[3, 8]).to be_nil
+      expect(generate_puzzle[3, 8].value).to be_nil
     end
 
     it 'can retreive a specific row' do
@@ -110,7 +112,7 @@ describe 'Sudoku' do
     end
 
     it 'is true for a completed puzzle' do
-      expect(Sudoku.new(filename: SOLUTION_FILE).solved?).to be true
+      expect(Sudoku.new(filename: EASY_SOLUTION).solved?).to be true
     end
   end
 
@@ -143,18 +145,61 @@ describe 'Sudoku' do
       expect(puzzle).to eq(Sudoku.new(filename: BEGINNER_SOLUTION))
     end
 
-    # it 'tries to solves the puzzle' do
-    #   puzzle = generate_puzzle
-    #   puts puzzle
-    #   puts "#########################"
-    #   puzzle.solve!
-    #   puts "#########################"
-    #   puts puzzle
-    # 
-    # end
+    it 'solves an easy puzzle' do
+      puzzle = Sudoku.new(filename: EASY)
+      puzzle.solve!
+      expect(puzzle).to eq(Sudoku.new(filename: EASY_SOLUTION))
+    end
+
+    it 'solves a medium puzzle' do
+      puzzle = Sudoku.new(filename: MEDIUM)
+      puzzle.solve!
+      expect(puzzle).to eq(Sudoku.new(filename: MEDIUM_SOLUTION))
+    end
+  end
+  
+  describe 'solving strategies' do
+    before(:each) do 
+      @puzzle = Sudoku.new(filename: MEDIUM)
+    end
+    describe 'unique in row' do
+      it 'raises an error if the cell cannot be the given value' do
+        expect{ @puzzle.unique_in_row?(@puzzle[1,2], 9) }.to raise_error(ArgumentError)
+      end
+      it 'returns true if a cell is the only in the row that can be a given value' do
+        expect(@puzzle.unique_in_row?(@puzzle[1,2], 2)).to be true
+      end
+      it 'returns false if a cell is NOT the only in the row that can be a given value' do
+        expect(@puzzle.unique_in_row?(@puzzle[1,2], 3)).to be false
+      end
+    end
+    describe 'unique in column' do
+      it 'raises an error if the cell cannot be the given value' do
+        expect{@puzzle.unique_in_col?(@puzzle[8,2], 7) }.to raise_error(ArgumentError)
+      end
+      it 'returns true if a cell is the only in the row that can be a given value' do
+        expect(@puzzle.unique_in_col?(@puzzle[8,2], 6)).to be true
+      end
+      
+      it 'returns false if a cell is NOT the only in the row that can be a given value' do
+        expect(@puzzle.unique_in_col?(@puzzle[8,2], 8)).to be false
+      end
+    end
+    describe 'unique in square' do
+      it 'raises an error if the cell cannot be the given value' do
+        expect{@puzzle.unique_in_square?(@puzzle[0,5], 9) }.to raise_error(ArgumentError)
+      end
+      it 'returns true if a cell is the only in the row that can be a given value' do
+        expect(@puzzle.unique_in_square?(@puzzle[7,6], 2)).to be true
+      end
+      
+      it 'returns false if a cell is NOT the only in the row that can be a given value' do
+        expect(@puzzle.unique_in_square?(@puzzle[7,6], 8)).to be false
+      end
+    end
   end
 
   def generate_puzzle
-    Sudoku.new(filename: FILENAME)
+    Sudoku.new(filename: EASY)
   end
 end

@@ -3,6 +3,9 @@
 
 This is a work in progress project that will allow for solving of a sudoku puzzle.
 
+# TODO:
+* Pull the solving logic out into a helper file that is separate from the Sudoku object
+
 # Future Features
 * GUI based on a Ruby on Rails interface where you enter a puzzle and then click a button to solve the puzzle
    * Keeps the initally entered values formatted in a different way than the solved values

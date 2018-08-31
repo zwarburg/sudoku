@@ -10,12 +10,12 @@ class Sudoku
   NUMBERS = (1..9).to_a
 
   def initialize(**args)
-    board = File.open(args[:filename]).map { |line| line[0, 9].chars.map(&:to_i) } if args[:filename]
+    board = File.open(args[:filename]).map { |line| line.chomp.ljust(SIZE).chars.map(&:to_i) } if args[:filename]
     board = args[:board] if !board && args[:board]
     if board || args[:board]
-      raise ArgumentError, 'board dimensions not valid' if board.length != SIZE
+      raise ArgumentError, 'board dimensions not valid1' if board.length != SIZE
       board.each do |row|
-        raise ArgumentError, 'board dimensions not valid' if row.length != SIZE
+        raise ArgumentError, 'board dimensions not valid2' if row.length > SIZE
       end
       @board = board.dup
       @board.map!.with_index do |row , y|
@@ -24,14 +24,7 @@ class Sudoku
         end
       end
     else
-      @board = []
-      SIZE.times do |y|
-        row = []
-        SIZE.times do |x|
-          row << Cell.new(nil, y, x)
-        end
-        @board << row
-      end
+      @board = (0...SIZE).map{ |y| (0...SIZE).map{|x| Cell.new(nil, y, x) } }
     end
     self.update_possibles!
   end
@@ -44,52 +37,6 @@ class Sudoku
     @board.map{|row| row.map{|cell| cell.value}}    
   end
   
-  def to_p
-    result = <<~BOARD
-      +---------+---------+---------+---------+---------+---------+---------+---------+---------+
-      |XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|
-      |XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|
-      |XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|
-      +---------+---------+---------|---------+---------+---------|---------+---------+---------+
-      |XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|
-      |XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|
-      |XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|
-      +---------+---------+---------|---------+---------+---------|---------+---------+---------+
-      |XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|
-      |XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|
-      |XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|
-      +---------+---------+---------+---------+---------+---------+---------+---------+---------+
-    BOARD
-    @board.flatten.each do |cell|
-      output = cell.solved? ? "#{cell.value}".center(9).red : cell.possibles.join.center(9)
-      result.sub!(/XXXXXXXXX/, output)
-    end
-    result
-  end
-
-  def to_s
-    result = <<~BOARD
-      +-------+-------+-------+
-      | X X X | X X X | X X X |
-      | X X X | X X X | X X X |
-      | X X X | X X X | X X X |
-      +-------+-------+-------+
-      | X X X | X X X | X X X |
-      | X X X | X X X | X X X |
-      | X X X | X X X | X X X |
-      +-------+-------+-------+
-      | X X X | X X X | X X X |
-      | X X X | X X X | X X X |
-      | X X X | X X X | X X X |
-      +-------+-------+-------+
-    BOARD
-    @board.flatten.each do |cell|
-      value = cell.value || ' '
-      result.sub!(/X/, value.to_s)
-    end
-    result
-  end
-
   def solve!
     until solved?
       @changed = false
@@ -204,6 +151,56 @@ class Sudoku
 
   def allowed_in_square(x, y)
     NUMBERS - values(square(x, y))
+  end
+
+  ##############
+  # Displayers #
+  ##############
+
+  def to_p
+    result = <<~BOARD
+      +---------+---------+---------+---------+---------+---------+---------+---------+---------+
+      |XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|
+      |XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|
+      |XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|
+      +---------+---------+---------|---------+---------+---------|---------+---------+---------+
+      |XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|
+      |XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|
+      |XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|
+      +---------+---------+---------|---------+---------+---------|---------+---------+---------+
+      |XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|
+      |XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|
+      |XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|XXXXXXXXX XXXXXXXXX XXXXXXXXX|
+      +---------+---------+---------+---------+---------+---------+---------+---------+---------+
+    BOARD
+    @board.flatten.each do |cell|
+      output = cell.solved? ? "#{cell.value}".center(9).red : cell.possibles.join.center(9)
+      result.sub!(/XXXXXXXXX/, output)
+    end
+    result
+  end
+
+  def to_s
+    result = <<~BOARD
+      +-------+-------+-------+
+      | X X X | X X X | X X X |
+      | X X X | X X X | X X X |
+      | X X X | X X X | X X X |
+      +-------+-------+-------+
+      | X X X | X X X | X X X |
+      | X X X | X X X | X X X |
+      | X X X | X X X | X X X |
+      +-------+-------+-------+
+      | X X X | X X X | X X X |
+      | X X X | X X X | X X X |
+      | X X X | X X X | X X X |
+      +-------+-------+-------+
+    BOARD
+    @board.flatten.each do |cell|
+      value = cell.value || ' '
+      result.sub!(/X/, value.to_s)
+    end
+    result
   end
 
   private

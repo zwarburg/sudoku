@@ -1,13 +1,4 @@
-require 'rspec'
-require_relative '../models/sudoku'
-
-BOARD = [[8, nil, 5, 3, 6, 9, nil, nil, nil], [nil, 4, nil, 5, nil, nil, 6, 1, 9], [nil, 9, 2, 7, nil, nil, nil, 8, 5], [2, 6, 9, nil, 3, nil, 1, 7, nil], [nil, nil, 1, 2, 4, 7, nil, nil, 3], [nil, 3, nil, nil, nil, 1, 5, 2, 8], [9, nil, 6, nil, 5, 8, nil, 3, nil], [4, nil, nil, nil, 2, 6, 8, 5, nil], [1, 5, nil, nil, nil, nil, 2, nil, 6]]
-BEGINNER = File.expand_path('../fixtures/beginner.txt', File.dirname(__FILE__))
-BEGINNER_SOLUTION = File.expand_path('../fixtures/beginner_solution.txt', File.dirname(__FILE__))
-EASY = File.expand_path('../fixtures/easy.txt', File.dirname(__FILE__))
-EASY_SOLUTION = File.expand_path('../fixtures/easy_solution.txt', File.dirname(__FILE__))
-MEDIUM = File.expand_path('../fixtures/medium.txt', File.dirname(__FILE__))
-MEDIUM_SOLUTION = File.expand_path('../fixtures/medium_solution.txt', File.dirname(__FILE__))
+require_relative '../spec_helper.rb'
 
 describe 'Sudoku' do
   describe 'initialize' do
@@ -132,31 +123,7 @@ describe 'Sudoku' do
     it 'verifies the values that are allowed in a particular cell' do
       expect(generate_puzzle.allowed_in_cell(8, 0)).to eq([2, 4, 7])
     end
-  end
-
-  describe 'solve' do
-    it 'raises an error if the puzzle cannot be solved' do
-      expect { Sudoku.new.solve! }.to raise_error('Not solvable at this time')
-    end
-
-    it 'solves a beginner puzzle' do
-      puzzle = Sudoku.new(filename: BEGINNER)
-      puzzle.solve!
-      expect(puzzle).to eq(Sudoku.new(filename: BEGINNER_SOLUTION))
-    end
-
-    it 'solves an easy puzzle' do
-      puzzle = Sudoku.new(filename: EASY)
-      puzzle.solve!
-      expect(puzzle).to eq(Sudoku.new(filename: EASY_SOLUTION))
-    end
-
-    it 'solves a medium puzzle' do
-      puzzle = Sudoku.new(filename: MEDIUM)
-      puzzle.solve!
-      expect(puzzle).to eq(Sudoku.new(filename: MEDIUM_SOLUTION))
-    end
-  end
+  end  
   
   describe 'solving strategies' do
     before(:each) do 
@@ -164,7 +131,7 @@ describe 'Sudoku' do
     end
     describe 'unique in row' do
       it 'raises an error if the cell cannot be the given value' do
-        expect{ @puzzle.unique_in_row?(@puzzle[1,2], 9) }.to raise_error(ArgumentError)
+        expect{@puzzle.unique_in_row?(@puzzle[1,2], 9) }.to raise_error(ArgumentError)
       end
       it 'returns true if a cell is the only in the row that can be a given value' do
         expect(@puzzle.unique_in_row?(@puzzle[1,2], 2)).to be true
@@ -197,6 +164,36 @@ describe 'Sudoku' do
         expect(@puzzle.unique_in_square?(@puzzle[7,6], 8)).to be false
       end
     end
+  end
+
+  describe 'solve' do
+    it 'raises an error if the puzzle cannot be solved' do
+      expect { Sudoku.new.solve! }.to raise_error('Not solvable at this time')
+    end
+
+    it 'solves a beginner puzzle' do
+      puzzle = Sudoku.new(filename: BEGINNER)
+      puzzle.solve!
+      expect(puzzle).to eq(Sudoku.new(filename: BEGINNER_SOLUTION))
+    end
+
+    it 'solves an easy puzzle' do
+      puzzle = Sudoku.new(filename: EASY)
+      puzzle.solve!
+      expect(puzzle).to eq(Sudoku.new(filename: EASY_SOLUTION))
+    end
+
+    it 'solves a medium puzzle' do
+      puzzle = Sudoku.new(filename: MEDIUM)
+      puzzle.solve!
+      expect(puzzle).to eq(Sudoku.new(filename: MEDIUM_SOLUTION))
+    end
+
+    # it 'solves a hard puzzle' do
+    #   puzzle = Sudoku.new(filename: HARD)
+    #   puzzle.solve!
+    #   expect(puzzle).to eq(Sudoku.new(filename: HARD_SOLUTION))
+    # end
   end
 
   def generate_puzzle

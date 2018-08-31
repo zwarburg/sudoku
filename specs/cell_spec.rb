@@ -1,5 +1,4 @@
-require 'rspec'
-require_relative '../models/cell'
+require_relative '../spec_helper.rb'
 
 describe 'Cell' do
   describe 'initialize' do

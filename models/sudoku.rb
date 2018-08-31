@@ -4,8 +4,8 @@ require 'colorize'
 
 class Sudoku
   attr_accessor :board
-  DEBUG = true
-  # DEBUG = false
+  # DEBUG = true
+  DEBUG = false
   SIZE = 9
   NUMBERS = (1..9).to_a
 

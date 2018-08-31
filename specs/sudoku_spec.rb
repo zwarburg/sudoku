@@ -2,12 +2,12 @@ require 'rspec'
 require_relative '../models/sudoku'
 
 BOARD = [[8, nil, 5, 3, 6, 9, nil, nil, nil], [nil, 4, nil, 5, nil, nil, 6, 1, 9], [nil, 9, 2, 7, nil, nil, nil, 8, 5], [2, 6, 9, nil, 3, nil, 1, 7, nil], [nil, nil, 1, 2, 4, 7, nil, nil, 3], [nil, 3, nil, nil, nil, 1, 5, 2, 8], [9, nil, 6, nil, 5, 8, nil, 3, nil], [4, nil, nil, nil, 2, 6, 8, 5, nil], [1, 5, nil, nil, nil, nil, 2, nil, 6]]
-BEGINNER = '../fixtures/beginner.txt'.freeze
-BEGINNER_SOLUTION = '../fixtures/beginner_solution.txt'.freeze
-EASY = '../fixtures/easy.txt'.freeze
-EASY_SOLUTION = '../fixtures/easy_solution.txt'.freeze
-MEDIUM = '../fixtures/medium.txt'.freeze
-MEDIUM_SOLUTION = '../fixtures/medium_solution.txt'.freeze
+BEGINNER = File.expand_path('../fixtures/beginner.txt', File.dirname(__FILE__))
+BEGINNER_SOLUTION = File.expand_path('../fixtures/beginner_solution.txt', File.dirname(__FILE__))
+EASY = File.expand_path('../fixtures/easy.txt', File.dirname(__FILE__))
+EASY_SOLUTION = File.expand_path('../fixtures/easy_solution.txt', File.dirname(__FILE__))
+MEDIUM = File.expand_path('../fixtures/medium.txt', File.dirname(__FILE__))
+MEDIUM_SOLUTION = File.expand_path('../fixtures/medium_solution.txt', File.dirname(__FILE__))
 
 describe 'Sudoku' do
   describe 'initialize' do
